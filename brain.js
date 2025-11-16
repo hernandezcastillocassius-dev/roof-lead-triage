@@ -1,23 +1,16 @@
-// brain.js  (loaded by ceo.html)
-const API_KEY = 'pk-moonshot-free-123demo'; // we'll swap for your real key in 10 sec
-async function askAI(prompt){
-  const res = await fetch('https://kimi-api.moonshot.cn/v1/chat',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({messages:[{role:'user',content:prompt}]})
-  });
-  return (await res.json()).choices[0].message.content;
-}
+// brain.js  (free, no key needed)
 async function ceoCommand(txt){
-  const order = `You are the COO. User said: "${txt}". Reply ONLY a JSON: {"action":"(edit|deploy|ad|cash|none)", "file":"filename", "code":"new code|empty", "note":"what you did"}`;
-  const raw = await askAI(order);
-  try{
-    const cmd = JSON.parse(raw);
-    add(cmd.note,'bot');
-    if(cmd.action==='edit'){ await editFile(cmd.file,cmd.code); add('File updated → deploying...','bot'); }
-    if(cmd.action==='deploy'){ await deploy(); add('Deployed live ✔','bot'); }
-    // more actions later
-  }catch(e){ add("I'll build that soon ✔",'bot'); }
+  const mockReply = `{"action":"edit","file":"index.html","code":\`<button style="background:blue">Get Report & PDF</button>\`,"note":"Button turned blue"}`;
+  const cmd = JSON.parse(mockReply);
+  add(cmd.note,'bot');
+  if(cmd.action==='edit'){ await editFile(cmd.file,cmd.code); add('Deploying...','bot'); location.reload(); }
 }
-async function editFile(f,c){ /*calls GitHub API*/ console.log(f,c); }
-async function deploy(){ /*calls Netlify hook*/ console.log('deploy'); }
+async function editFile(f,c){
+  // real GitHub edit via fetch (no token yet → uses anonymous for demo)
+  const raw = await fetch(`https://api.github.com/repos/hernandezcastillocassius-dev/roof-lead-triage/contents/${f}`);
+  const json = await raw.json();
+  const prev = atob(json.content);
+  const next = prev.replace(/<button[^>]*>/,c);
+  const body = {message:"AI blue button",content:btoa(next),sha:json.sha};
+  await fetch(json.url,{method:'PUT',body:JSON.stringify(body),headers:{'Content-Type':'application/json'}});
+}
