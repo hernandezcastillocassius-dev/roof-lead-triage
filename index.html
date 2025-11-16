@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Roof-Leak Triage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:1rem;background:#f7f7f7}
+    h2{color:#d32f2f}
+    label{display:block;margin:.5rem 0}
+    button{background:#1976d2;color:#fff;border:none;padding:.75rem 1.5rem;border-radius:4px}
+  </style>
+</head>
+<body>
+  <h2>1-Minute Roof-Leak Check</h2>
+  <form id="quiz">
+    <label><input type="radio" name="q1" value="3"> Water dripping inside now</label>
+    <label><input type="radio" name="q1" value="2"> Stains / wet insulation</label>
+    <label><input type="radio" name="q1" value="1"> Shingles missing but no leak yet</label>
+
+    <label><input type="radio" name="q2" value="3"> >50 shingles missing</label>
+    <label><input type="radio" name="q2" value="2"> 10-50 missing</label>
+    <label><input type="radio" name="q2" value="1"> <10 missing</label>
+
+    <label><input type="radio" name="q3" value="3"> Hail >2″ or golf-ball size</label>
+    <label><input type="radio" name="q3" value="2"> 1-2″ hail</label>
+    <label><input type="radio" name="q3" value="1"> <1″ hail</label>
+
+    <label><input type="radio" name="q4" value="3"> Roof age >15 yrs</label>
+    <label><input type="radio" name="q4" value="2"> 8-15 yrs</label>
+    <label><input type="radio" name="q4" value="1"> <8 yrs</label>
+
+    <label><input type="radio" name="q5" value="3"> Inside ceiling sagging</label>
+    <label><input type="radio" name="q5" value="2"> Paint bubbling</label>
+    <label><input type="radio" name="q5" value="1"> No interior signs</label>
+
+    <button type="submit">Get Report & PDF</button>
+  </form>
+  <p id="score"></p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+  <script>
+    document.getElementById('quiz').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const data = new FormData(this);
+      let sum = 0, count = 0;
+      for (let [k,v] of data.entries()) { sum += Number(v); count++; }
+      if (count < 5) { alert('Please answer all questions'); return; }
+      const severity = sum <= 6 ? 'Low' : sum <= 9 ? 'Medium' : 'High';
+      document.getElementById('score').textContent = 'Severity: ' + severity;
+
+      const doc = {
+        content: [
+          { text: 'Roof-Leak Triage Report', style: 'header' },
+          { text: 'Generated ' + new Date().toLocaleString(), style: 'sub' },
+          { text: 'Severity score: ' + severity, style: 'body' },
+          { text: severity === 'High' ? 'Recommendation: Emergency tarp & call adjuster immediately.' :
+                 severity === 'Medium' ? 'Recommendation: Schedule roofer within 48 h.' :
+                 'Recommendation: Monitor; book inspection within 2 weeks.', style: 'body' }
+        ],
+        styles: {
+          header: { fontSize: 22, bold: true, margin: [0, 0, 0, 10] },
+          sub: { fontSize: 10, italics: true, margin: [0, 0, 0, 15] },
+          body: { fontSize: 12, margin: [0, 5, 0, 5] }
+        }
+      };
+      pdfMake.createPdf(doc).download('roof-report.pdf');
+    });
+  </script>
+</body>
+</html>
