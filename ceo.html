@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CEO Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:1rem;background:#fff}
+    #chat{border:1px solid #ccc;height:60vh;overflow-y:auto;padding:.5rem;margin-bottom:.5rem}
+    .msg{margin:.25rem 0}
+    .user{text-align:right;color:#1976d2}
+    .bot{text-align:left;color:#333}
+    input{width:70%;padding:.5rem;border:1px solid #ccc;border-radius:4px}
+    button{padding:.5rem 1rem;margin-left:.25rem;border:none;background:#1976d2;color:#fff;border-radius:4px}
+  </style>
+</head>
+<body>
+  <h2>CEO Chat – tell me what to do</h2>
+  <div id="chat"></div>
+  <input id="in" placeholder="Type or tap mic 🎤" autocomplete="off">
+  <button onclick="send()">Send</button>
+
+  <script>
+    const chat = document.getElementById('chat');
+    function add(txt, who) {
+      const d = document.createElement('div');
+      d.className = 'msg ' + who;
+      d.textContent = txt;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+    async function send() {
+      const txt = document.getElementById('in').value.trim();
+      if (!txt) return;
+      add(txt, 'user');
+      document.getElementById('in').value = '';
+      // super-simple echo AI (we upgrade to real AI next)
+      await new Promise(r => setTimeout(r, 500));
+      add("Got it – I'll build that next.", 'bot');
+    }
+    // mic button
+    if ('webkitSpeechRecognition' in window) {
+      const rec = new webkitSpeechRecognition();
+      rec.lang = 'en-US';
+      rec.onresult = e => document.getElementById('in').value = e.results[0][0].transcript;
+      document.getElementById('in').addEventListener('click', () => { rec.start(); });
+    }
+  </script>
+</body>
+</html>
